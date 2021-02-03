@@ -1,37 +1,15 @@
 'use strict';
 
 const ValidationContract = require('../validators/fluent-validator');
-const repository = require('../repositories/product-repository');
-
-exports.getBySlug = async (req, res, next) => {
-  try {
-    const data = await repository.getBySlug(req.params.slug);
-    res.status(200).send(data);
-  } catch (e) {
-    res.status(500).send({
-      message: 'Falha ao processar requisição.'
-    });
-  }
-};
+const repository = require('../repositories/customer-repository');
 
 exports.getById = async (req, res, next) => {
   try {
     const data = await repository.getById(req.params.id);
     res.status(200).send(data);
   } catch (e) {
-    res.status(500).send({
-      message: 'Falha ao processar requisição.'
-    });
-  }
-};
-
-exports.getByTag = async (req, res, next) => {
-  try {
-    const data = await repository.getByTag(req.params.tag);
-    res.status(200).send(data);
-  } catch (e) {
-    res.status(500).send({
-      message: 'Falha ao processar requisição.'
+    res.status(404).send({
+      message: 'Cliente não encontrado. Verifique id.'
     });
   }
 };
@@ -50,9 +28,9 @@ exports.get = async (req, res, next) => {
 exports.post = async (req, res, next) => {
   const validator = new ValidationContract();
 
-  validator.hasMinLen(req.body.title, 3, 'Título deve ter ao menos 3 caracteres.');
-  validator.hasMinLen(req.body.slug, 3, 'Slug deve ter ao menos 3 caracteres.');
-  validator.hasMinLen(req.body.description, 10, 'Descrição deve ter no minímo 10 caracteres');
+  validator.hasMinLen(req.body.name, 3, 'Nome não pode ser menor que 3 caracteres.');
+  validator.isEmail(req.body.email, 'Email não é válido.');
+  validator.hasMinLen(req.body.password, 6, 'Senha não pode conter menos de 6 caracteres.');
 
   if (!validator.isValid()) {
     res.status(400).send(validator.errors()).end();
@@ -62,11 +40,11 @@ exports.post = async (req, res, next) => {
   try {
     await repository.create(req.body);
     res.status(201).send({
-      message: 'Produto cadastrado com sucesso!'
+      message: 'Cliente cadastrado com sucesso!'
     });
   } catch (e) {
     res.status(500).send({
-      message: 'Falha ao processar requisição.'
+      message: 'Erro ao processar requisição'
     });
   }
 };
@@ -74,8 +52,8 @@ exports.post = async (req, res, next) => {
 exports.put = async (req, res, next) => {
   try {
     await repository.update(req.params.id, req.body);
-    res.status(201).send({
-      message: 'Produto atualizado com sucesso!'
+    res.status(200).send({
+      message: 'Cliente atualizado com sucesso!'
     });
   } catch (e) {
     res.status(500).send({
@@ -88,7 +66,7 @@ exports.delete = (req, res, next) => {
   try {
     repository.delete(req.params.id);
     res.status(200).send({
-      message: 'Produto removido com sucesso!'
+      message: 'Cliente removido com sucesso!'
     });
   } catch (e) {
     res.status(500).send({
